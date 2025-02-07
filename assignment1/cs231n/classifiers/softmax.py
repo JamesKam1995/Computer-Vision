@@ -34,7 +34,18 @@ def softmax_loss_naive(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    N = X.shape[0] # num_samples
+
+    for i in range(N):
+        y_hat = X[i] @ W
+        y_exp = np.exp(y_hat - y_hat.max())
+        softmax = y_exp / y_exp.sum()
+        loss -= np.log(softmax[y[i]])
+        softmax[y[i]] -= 1
+        dW += np.outer(X[i], softmax)
+
+    loss = loss / N + reg * np.sum(W**2)
+    dW = dW /N + 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -59,7 +70,18 @@ def softmax_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    N = X.shape[0]
+    Y_hat = X @ W
+
+    P = np.exp(Y_hat - Y_hat.max()) #Numerical stable version
+    P /= P.sum(axis = 1, keepdims = True) # row-wise prob
+
+    loss = -np.log(P[range(N), y]).sum() #sum cross entropies as loss
+    loss = loss / N +reg * np.sum(W**2) #average loss and regularize
+
+    P[range(N), y] -= 1
+    dW = X.T @ P / N + 2 * reg * W
+
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
